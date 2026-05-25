@@ -38,7 +38,18 @@ class SekolahController extends Controller
 
         // Filter status
         if ($request->status && $request->status !== 'all') {
-            $query->where('status', 'ilike', '%' . $request->status . '%');
+            $statusInput = strtolower($request->status);
+            if ($statusInput === 'negeri') {
+                $query->where(function($q) {
+                    $q->where('status', 'N')->orWhere('status', 'ilike', '%negeri%');
+                });
+            } elseif ($statusInput === 'swasta') {
+                $query->where(function($q) {
+                    $q->where('status', 'S')->orWhere('status', 'ilike', '%swasta%');
+                });
+            } else {
+                $query->where('status', 'ilike', '%' . $request->status . '%');
+            }
         }
 
         // Search nama sekolah
@@ -53,6 +64,10 @@ class SekolahController extends Controller
             $lng = (float)$s->long;
             return is_finite($lat) && is_finite($lng) && !is_nan($lat) && !is_nan($lng);
         })->values()->map(function ($s) {
+            $statusStr = $s->status;
+            if ($statusStr === 'N') $statusStr = 'Negeri';
+            elseif ($statusStr === 'S') $statusStr = 'Swasta';
+
             return [
                 'type' => 'Feature',
                 'geometry' => [
@@ -63,7 +78,7 @@ class SekolahController extends Controller
                     'id' => $s->id_sekolah,
                     'name' => $s->school_name,
                     'stage' => $s->stage,
-                    'status' => $s->status,
+                    'status' => $statusStr,
                     'city' => $s->city_name,
                     'district' => $s->district_name,
                     'lat' => (float)$s->lat,
@@ -140,8 +155,8 @@ class SekolahController extends Controller
 
         $perStatus = Sekolah::select(DB::raw("
                 CASE 
-                    WHEN LOWER(status) LIKE '%negeri%' THEN 'Negeri'
-                    WHEN LOWER(status) LIKE '%swasta%' THEN 'Swasta'
+                    WHEN status = 'N' OR LOWER(status) LIKE '%negeri%' THEN 'Negeri'
+                    WHEN status = 'S' OR LOWER(status) LIKE '%swasta%' THEN 'Swasta'
                     ELSE status 
                 END as status_group
             "), DB::raw('count(*) as jumlah'))
@@ -174,5 +189,76 @@ class SekolahController extends Controller
             ->pluck('city_name');
 
         return response()->json($kota);
+    }
+
+    /**
+     * API: data sekolah + bantuan
+     */
+    public function getBantuan(Request $request)
+    {
+        $query = DB::table('sekolah')
+            ->join('bantuan_sekolah', 'sekolah.id_sekolah', '=', 'bantuan_sekolah.id_sekolah')
+            ->whereNotNull('sekolah.lat')
+            ->whereNotNull('sekolah.long');
+            
+        if ($request->jenis_bantuan && $request->jenis_bantuan !== 'all') {
+            $query->where('bantuan_sekolah.jenis_bantuan', $request->jenis_bantuan);
+        }
+        
+        if ($request->status_bantuan && $request->status_bantuan !== 'all') {
+            $query->where('bantuan_sekolah.status_bantuan', $request->status_bantuan);
+        }
+        
+        if ($request->tingkat_prioritas && $request->tingkat_prioritas !== 'all') {
+            $query->where('bantuan_sekolah.tingkat_prioritas', $request->tingkat_prioritas);
+        }
+
+        $bantuan = $query->get();
+
+        $features = $bantuan->map(function ($b) {
+            return [
+                'type' => 'Feature',
+                'geometry' => [
+                    'type' => 'Point',
+                    'coordinates' => [(float)$b->long, (float)$b->lat],
+                ],
+                'properties' => [
+                    'id_sekolah' => $b->id_sekolah,
+                    'id_bantuan' => $b->id_bantuan,
+                    'school_name' => $b->school_name,
+                    'stage' => $b->stage,
+                    'jenis_bantuan' => $b->jenis_bantuan,
+                    'jumlah' => $b->jumlah,
+                    'status_bantuan' => $b->status_bantuan,
+                    'tingkat_prioritas' => $b->tingkat_prioritas,
+                    'keterangan' => $b->keterangan,
+                    'lat' => (float)$b->lat,
+                    'lng' => (float)$b->long,
+                ],
+            ];
+        });
+
+        return response()->json([
+            'type' => 'FeatureCollection',
+            'features' => $features,
+        ]);
+    }
+
+    /**
+     * API: prioritas bantuan dari view_prioritas_bantuan
+     */
+    public function getPrioritasBantuan(Request $request)
+    {
+        $prioritas = DB::table('view_prioritas_bantuan')->get();
+        return response()->json($prioritas);
+    }
+
+    /**
+     * API: jalur bantuan dari view_jalur_bantuan
+     */
+    public function getJalurBantuan(Request $request)
+    {
+        $jalur = DB::table('view_jalur_bantuan')->get();
+        return response()->json($jalur);
     }
 }

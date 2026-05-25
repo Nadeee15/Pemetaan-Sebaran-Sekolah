@@ -1,415 +1,768 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SIG Sekolah Lampung - Pemetaan Sebaran Sekolah</title>
-<meta name="description" content="Sistem Informasi Geografis pemetaan sebaran sekolah dan analisis aksesibilitas pendidikan di Provinsi Lampung">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --primary:#1a56db;--primary-dark:#1e40af;--accent:#06b6d4;
-  --bg:#0f172a;--surface:#1e293b;--surface2:#334155;
-  --text:#f1f5f9;--text-muted:#94a3b8;--border:#334155;
-  --sd:#f59e0b;--smp:#10b981;--sma:#3b82f6;--smk:#8b5cf6;--slb:#ef4444;
-}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistem Informasi Geografis Pemetaan Sekolah Provinsi Lampung">
+    <title>SIG Sekolah Lampung — Pemetaan & Aksesibilitas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    @vite(['resources/css/app.css'])
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
 
-/* HEADER */
-.header{background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:16px;z-index:1000;flex-shrink:0}
-.header-logo{width:40px;height:40px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.header-title h1{font-size:16px;font-weight:700;color:var(--text)}
-.header-title p{font-size:11px;color:var(--text-muted)}
-.header-stats{margin-left:auto;display:flex;gap:12px}
-.hstat{text-align:center;background:var(--surface);padding:6px 14px;border-radius:8px;border:1px solid var(--border)}
-.hstat-num{font-size:16px;font-weight:700;color:var(--accent)}
-.hstat-lbl{font-size:10px;color:var(--text-muted)}
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #fafaf9; }
+        ::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 99px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a29e; }
 
-/* MAIN LAYOUT */
-.main{display:flex;flex:1;overflow:hidden}
+        /* LEAFLET POPUP */
+        .leaflet-popup-content-wrapper { background: #ffffff; color: #1c1917; border: 1px solid #e7e5e4; border-radius: 12px; box-shadow: 0 12px 32px rgb(0 0 0 / 0.1); }
+        .leaflet-popup-tip { background: #ffffff; }
+        .leaflet-popup-content { margin: 14px; }
+        .leaflet-container a.leaflet-popup-close-button { color: #64748b; padding: 4px; }
 
-/* SIDEBAR */
-.sidebar{width:320px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
-.sidebar-header{padding:14px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em}
+        /* BODY */
+        body { background: #fafaf9; color: #1c1917; font-family: 'Inter', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; margin: 0; }
 
-/* FILTER PANEL */
-.filter-group{padding:14px 16px;border-bottom:1px solid var(--border)}
-.filter-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px}
-.search-box{position:relative;margin-bottom:10px}
-.search-box input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 10px 8px 34px;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;outline:none;transition:.2s}
-.search-box input:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(26,86,219,.2)}
-.search-box i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:12px}
-.select-custom{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;outline:none;cursor:pointer;margin-bottom:8px}
-.btn-filter{width:100%;padding:9px;background:linear-gradient(135deg,var(--primary),var(--accent));border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:.2s}
-.btn-filter:hover{opacity:.9;transform:translateY(-1px)}
-.btn-reset{width:100%;padding:8px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:.2s;margin-top:6px}
-.btn-reset:hover{border-color:var(--text-muted);color:var(--text)}
+        /* HEADER */
+        .app-header { height: 56px; background: #ffffff; border-bottom: 1px solid #e7e5e4; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 50; flex-shrink: 0; }
+        .header-logo { background: #0d9488; color: #fff; padding: 7px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+        .header-title h1 { font-size: 15px; font-weight: 700; color: #1c1917; margin: 0; letter-spacing: -0.01em; }
+        .header-title p { font-size: 11px; color: #78716c; margin: 0; }
+        .header-stats { display: flex; align-items: center; gap: 20px; font-size: 12px; }
+        .stat-pill { display: flex; flex-direction: column; align-items: flex-end; }
+        .stat-pill span:first-child { color: #78716c; font-size: 11px; }
+        .stat-pill span:last-child { font-family: 'Inter', monospace; font-weight: 700; color: #1c1917; font-size: 16px; }
+        .stat-divider { width: 1px; height: 28px; background: #e7e5e4; }
 
-/* RADIUS TOOL */
-.radius-group{padding:14px 16px;border-bottom:1px solid var(--border)}
-.radius-btns{display:flex;gap:6px;flex-wrap:wrap}
-.btn-radius{flex:1;min-width:60px;padding:7px 4px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text-muted);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;text-align:center;transition:.2s}
-.btn-radius:hover,.btn-radius.active{background:var(--primary);border-color:var(--primary);color:#fff}
-.btn-radius-clear{width:100%;padding:7px;background:transparent;border:1px solid var(--border);border-radius:7px;color:var(--text-muted);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;margin-top:6px;transition:.2s}
-.btn-radius-clear:hover{border-color:#ef4444;color:#ef4444}
-.radius-hint{font-size:11px;color:var(--text-muted);margin-top:8px;padding:7px;background:rgba(6,182,212,.08);border-radius:6px;border-left:2px solid var(--accent)}
+        /* MAIN LAYOUT */
+        .app-main { display: flex; flex: 1; overflow: hidden; }
 
-/* LEGENDA */
-.legenda-group{padding:14px 16px;border-bottom:1px solid var(--border)}
-.legenda-item{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px}
-.legenda-dot{width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.3);flex-shrink:0}
+        /* SIDEBAR */
+        .app-sidebar { width: 340px; background: #ffffff; border-right: 1px solid #e7e5e4; display: flex; flex-direction: column; flex-shrink: 0; z-index: 40; }
 
-/* STATISTIK */
-.stat-group{padding:14px 16px;flex:1;overflow-y:auto}
-.stat-item{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:7px;margin-bottom:6px;font-size:12px}
-.stat-bar{height:4px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden}
-.stat-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
-.result-count{padding:10px 16px;background:rgba(6,182,212,.08);border-top:1px solid var(--border);font-size:12px;color:var(--accent);font-weight:500}
+        /* TABS */
+        .tab-bar { display: flex; padding: 6px; border-bottom: 1px solid #e7e5e4; gap: 4px; background: #fafaf9; }
+        .tab-btn { flex: 1; padding: 7px 0; font-size: 13px; font-weight: 500; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; background: transparent; color: #78716c; font-family: inherit; }
+        .tab-btn:hover { color: #1c1917; background: #f5f5f4; }
+        .tab-btn.active { background: #ffffff; color: #1c1917; border-color: #e7e5e4; box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-weight: 600; }
 
-/* MAP */
-#map{flex:1;position:relative}
+        /* SIDEBAR CONTENT */
+        .sidebar-scroll { flex: 1; overflow-y: auto; }
+        .sidebar-section { padding: 16px; border-bottom: 1px solid #f5f5f4; }
+        .section-label { font-size: 11px; font-weight: 600; color: #a8a29e; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
 
-/* POPUP */
-.leaflet-popup-content-wrapper{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 20px 40px rgba(0,0,0,.5)}
-.leaflet-popup-tip{background:var(--surface)}
-.leaflet-popup-content{margin:0!important}
-.popup-card{padding:14px}
-.popup-badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;margin-bottom:8px}
-.popup-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px;line-height:1.4}
-.popup-info{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px;margin-bottom:4px}
-.popup-info i{width:14px;color:var(--accent)}
-.popup-actions{display:flex;gap:6px;margin-top:10px}
-.popup-btn{flex:1;padding:6px;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600}
-.popup-btn-radius{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff}
-.popup-btn-close{background:var(--surface2);color:var(--text-muted);border:1px solid var(--border);}
+        /* INPUTS */
+        .input-search { width: 100%; background: #fafaf9; border: 1px solid #d6d3d1; border-radius: 8px; padding: 9px 10px 9px 34px; font-size: 13px; color: #1c1917; font-family: inherit; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+        .input-search:focus { border-color: #5eead4; box-shadow: 0 0 0 3px rgba(13,148,136,0.08); }
+        .input-search::placeholder { color: #a8a29e; }
+        .input-wrap { position: relative; margin-bottom: 10px; }
+        .input-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #a8a29e; width: 16px; height: 16px; }
+        select.form-select { width: 100%; background: #fafaf9; border: 1px solid #d6d3d1; border-radius: 8px; padding: 9px 10px; font-size: 13px; color: #1c1917; font-family: inherit; outline: none; transition: border-color 0.2s; cursor: pointer; margin-bottom: 10px; -webkit-appearance: none; }
+        select.form-select:focus { border-color: #5eead4; }
 
-/* RADIUS INFO */
-.radius-info{position:absolute;bottom:30px;right:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;z-index:1000;max-width:220px;font-size:12px}
-.radius-info h4{color:var(--accent);font-size:13px;margin-bottom:6px}
-.radius-info p{color:var(--text-muted);margin-bottom:4px}
-.radius-close{cursor:pointer;color:var(--text-muted);float:right;font-size:14px}
+        /* BUTTONS */
+        .btn-primary { width: 100%; background: #0d9488; color: #fff; border: none; border-radius: 8px; padding: 9px 12px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s ease; }
+        .btn-primary:hover { background: #0f766e; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(13,148,136,0.2); }
+        .btn-icon { padding: 8px; background: #fafaf9; border: 1px solid #d6d3d1; border-radius: 8px; color: #78716c; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+        .btn-icon:hover { background: #f5f5f4; border-color: #a8a29e; }
+        .btn-row { display: flex; gap: 8px; }
 
-/* TOAST */
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--accent);border-radius:8px;padding:10px 16px;font-size:13px;color:var(--text);z-index:9999;opacity:0;transition:.3s;pointer-events:none}
-.toast.show{opacity:1}
+        /* RADIUS BUTTONS */
+        .radius-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+        .btn-radius { background: #fafaf9; border: 1px solid #d6d3d1; border-radius: 8px; padding: 8px 4px; font-size: 12px; color: #57534e; font-family: inherit; cursor: pointer; text-align: center; transition: all 0.2s; }
+        .btn-radius:hover { border-color: #99f6e4; color: #0d9488; background: #f0fdfa; }
+        .btn-radius.active { background: #0d9488; border-color: #0d9488; color: #ffffff; font-weight: 600; }
+        .btn-danger-ghost { width: 100%; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #dc2626; font-family: inherit; cursor: pointer; transition: all 0.2s; }
+        .btn-danger-ghost:hover { background: #fee2e2; border-color: #fca5a5; }
+        .btn-outline { width: 100%; background: #fafaf9; border: 1px solid #d6d3d1; border-radius: 8px; padding: 9px 12px; font-size: 13px; color: #57534e; font-family: inherit; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-outline:hover { border-color: #99f6e4; color: #0d9488; }
+        .btn-blue { background: #0d9488; color: #fff; border-color: transparent; }
+        .btn-blue:hover { background: #0f766e; }
 
-/* SCROLLBAR */
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:var(--surface)}
-::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:3px}
-</style>
+        /* LEGENDA */
+        .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #57534e; font-weight: 500; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(0,0,0,0.06); }
+
+        /* STATISTIK */
+        .stat-bar-item { margin-bottom: 12px; }
+        .stat-bar-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
+        .stat-bar-label span:first-child { font-weight: 500; color: #44403c; }
+        .stat-bar-label span:last-child { color: #78716c; }
+        .stat-bar-track { height: 6px; width: 100%; background: #f5f5f4; border-radius: 99px; overflow: hidden; }
+        .stat-bar-fill { height: 100%; border-radius: 99px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+
+        /* INFO BOX */
+        .info-box { background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #115e59; line-height: 1.7; }
+
+        /* PRIORITY CARDS */
+        .priority-card { background: #fff; border: 1px solid #e7e5e4; border-radius: 10px; padding: 12px 14px; cursor: pointer; transition: all 0.2s ease; margin-bottom: 8px; }
+        .priority-card:hover { border-color: #99f6e4; box-shadow: 0 4px 12px rgba(13,148,136,0.06); transform: translateY(-1px); }
+        .priority-name { font-weight: 600; font-size: 13px; color: #1c1917; transition: color 0.2s; }
+        .priority-card:hover .priority-name { color: #0d9488; }
+        .priority-badge { font-size: 9px; background: #fef2f2; color: #dc2626; padding: 2px 7px; border-radius: 4px; border: 1px solid #fecaca; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+        .priority-loc { font-size: 11px; color: #78716c; display: flex; align-items: center; gap: 4px; margin: 4px 0 6px; }
+        .priority-detail { background: #fafaf9; border-radius: 8px; padding: 8px 10px; font-size: 12px; color: #57534e; border: 1px solid #f5f5f4; }
+
+        /* MAP STATUS OVERLAY */
+        .map-status { position: absolute; bottom: 24px; left: 24px; background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border: 1px solid #e7e5e4; padding: 10px 16px; border-radius: 12px; font-size: 12px; font-weight: 500; z-index: 1000; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); transition: opacity 0.3s; color: #57534e; }
+
+        /* RADIUS INFO */
+        .radius-info-panel { position: absolute; top: 24px; right: 24px; background: rgba(255,255,255,0.97); backdrop-filter: blur(12px); border: 1px solid #e7e5e4; padding: 20px; border-radius: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); z-index: 1000; width: 290px; }
+        .ri-title { font-size: 14px; font-weight: 700; color: #1c1917; display: flex; align-items: center; gap: 8px; }
+        .ri-count { font-size: 36px; font-family: 'Inter', sans-serif; font-weight: 800; color: #0d9488; margin: 8px 0 2px; letter-spacing: -0.02em; }
+        .ri-desc { font-size: 12px; color: #78716c; margin-bottom: 14px; }
+        .ri-divider { height: 1px; background: #f5f5f4; margin-bottom: 12px; }
+        .ri-list-label { font-size: 10px; color: #a8a29e; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; margin-bottom: 8px; }
+        .ri-school-item { background: #fafaf9; padding: 10px; border-radius: 8px; border: 1px solid #e7e5e4; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; transition: border-color 0.2s; }
+        .ri-school-item:hover { border-color: #d6d3d1; }
+        .ri-school-name { font-weight: 500; font-size: 12px; color: #1c1917; }
+        .ri-school-sub { font-size: 10px; color: #78716c; }
+        .ri-school-dist { font-size: 12px; font-family: 'Inter', monospace; color: #0d9488; font-weight: 700; }
+
+        /* PULSE ANIMATION */
+        @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0.5; } 100% { transform: scale(2.4); opacity: 0; } }
+        .marker-pulse::before { content: ''; position: absolute; left: -50%; top: -50%; width: 200%; height: 200%; border-radius: 50%; animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
+
+        /* POPUP INNER */
+        .popup-title { font-weight: 700; font-size: 14px; color: #1c1917; margin-bottom: 8px; }
+        .popup-badge { font-size: 10px; padding: 2px 8px; border-radius: 4px; background: #f5f5f4; border: 1px solid #e7e5e4; color: #57534e; }
+        .popup-meta { font-size: 12px; color: #78716c; display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+        .popup-divider { height: 1px; background: #f5f5f4; margin: 10px 0; }
+        .popup-btn-radius { width: 100%; background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 8px; padding: 8px; font-size: 12px; font-weight: 600; color: #0d9488; font-family: inherit; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .popup-btn-radius:hover { background: #ccfbf1; }
+        .popup-detail-box { background: #fafaf9; border: 1px solid #e7e5e4; border-radius: 8px; padding: 8px 10px; font-size: 12px; margin-top: 8px; }
+        .popup-detail-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .popup-detail-row:last-child { margin-bottom: 0; }
+        .popup-detail-label { color: #a8a29e; }
+        .popup-detail-value { font-weight: 500; color: #1c1917; }
+        .popup-note { font-size: 10px; color: #a8a29e; font-style: italic; margin-top: 6px; }
+    </style>
 </head>
 <body>
 
 <!-- HEADER -->
-<header class="header">
-  <div class="header-logo"><i class="fas fa-map-marked-alt" style="color:#fff"></i></div>
-  <div class="header-title">
-    <h1>SIG Sekolah Lampung</h1>
-    <p>Sistem Informasi Geografis · Pemetaan Sebaran Sekolah</p>
-  </div>
-  <div class="header-stats">
-    <div class="hstat"><div class="hstat-num" id="stat-total">-</div><div class="hstat-lbl">Total Sekolah</div></div>
-    <div class="hstat"><div class="hstat-num" id="stat-tampil">-</div><div class="hstat-lbl">Ditampilkan</div></div>
-    <div class="hstat" style="display:none" id="radius-stat"><div class="hstat-num" id="stat-radius">-</div><div class="hstat-lbl">Dalam Radius</div></div>
-  </div>
+<header class="app-header">
+    <div style="display:flex;align-items:center;gap:12px;">
+        <div class="header-logo">
+            <i data-lucide="map" style="width:20px;height:20px;"></i>
+        </div>
+        <div class="header-title">
+            <h1>SIG Sekolah Lampung</h1>
+            <p>Pemetaan &amp; Aksesibilitas Pendidikan</p>
+        </div>
+    </div>
+    <div class="header-stats">
+        <div class="stat-pill">
+            <span>Total Sekolah</span>
+            <span id="header-total">-</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-pill">
+            <span>Ditampilkan</span>
+            <span id="header-tampil">-</span>
+        </div>
+    </div>
 </header>
 
 <!-- MAIN -->
-<div class="main">
+<div class="app-main">
+    <!-- SIDEBAR -->
+    <aside class="app-sidebar">
+        <!-- TABS -->
+        <div class="tab-bar">
+            <button onclick="switchTab('sekolah')" id="tab-btn-sekolah" class="tab-btn active">Data Sekolah</button>
+            <button onclick="switchTab('bantuan')" id="tab-btn-bantuan" class="tab-btn">Bantuan Pendidikan</button>
+        </div>
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-header"><i class="fas fa-sliders-h"></i> &nbsp;Filter & Alat</div>
+        <div class="sidebar-scroll">
+            <!-- TAB: SEKOLAH -->
+            <div id="tab-sekolah">
+                <!-- Search & Filter -->
+                <div class="sidebar-section">
+                    <div class="section-label">
+                        <i data-lucide="search" style="width:14px;height:14px;"></i> Pencarian &amp; Filter
+                    </div>
+                    <div class="input-wrap">
+                        <i data-lucide="search" class="input-icon"></i>
+                        <input type="text" id="filter-search" placeholder="Cari nama sekolah..." class="input-search">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+                        <select id="filter-stage" class="form-select" style="margin-bottom:0;">
+                            <option value="all">Semua Jenjang</option>
+                            <option value="SD">SD</option>
+                            <option value="SMP">SMP</option>
+                            <option value="SMA">SMA</option>
+                            <option value="SMK">SMK</option>
+                            <option value="SLB">SLB</option>
+                        </select>
+                        <select id="filter-status" class="form-select" style="margin-bottom:0;">
+                            <option value="all">Semua Status</option>
+                            <option value="Negeri">Negeri</option>
+                            <option value="Swasta">Swasta</option>
+                        </select>
+                    </div>
+                    <div class="btn-row">
+                        <button onclick="applyFilterSekolah()" class="btn-primary" style="flex:1;">Terapkan Filter</button>
+                        <button onclick="resetFilterSekolah()" class="btn-icon" title="Reset Filter">
+                            <i data-lucide="rotate-ccw" style="width:16px;height:16px;"></i>
+                        </button>
+                    </div>
+                </div>
 
-    <!-- FILTER -->
-    <div class="filter-group">
-      <div class="filter-label"><i class="fas fa-search"></i> Cari Sekolah</div>
-      <div class="search-box">
-        <i class="fas fa-search"></i>
-        <input type="text" id="input-search" placeholder="Nama sekolah..." autocomplete="off">
-      </div>
-      <div class="filter-label" style="margin-top:10px"><i class="fas fa-filter"></i> Filter</div>
-      <select class="select-custom" id="filter-stage">
-        <option value="all">Semua Jenjang</option>
-        <option value="SD">SD</option>
-        <option value="SMP">SMP</option>
-        <option value="SMA">SMA</option>
-        <option value="SMK">SMK</option>
-        <option value="SLB">SLB</option>
-      </select>
-      <select class="select-custom" id="filter-status">
-        <option value="all">Semua Status</option>
-        <option value="Negeri">Negeri</option>
-        <option value="Swasta">Swasta</option>
-      </select>
-      <button class="btn-filter" id="btn-apply-filter" onclick="applyFilter()">
-        <i class="fas fa-search"></i> Terapkan Filter
-      </button>
-      <button class="btn-reset" onclick="resetFilter()"><i class="fas fa-undo"></i> Reset</button>
-    </div>
+                <!-- Radius Layanan -->
+                <div class="sidebar-section">
+                    <div class="section-label">
+                        <i data-lucide="target" style="width:14px;height:14px;"></i> Radius Layanan
+                    </div>
+                    <div class="radius-grid">
+                        <button onclick="setRadius(500)" class="btn-radius" data-val="500">500m</button>
+                        <button onclick="setRadius(1000)" class="btn-radius" data-val="1000">1km</button>
+                        <button onclick="setRadius(3000)" class="btn-radius" data-val="3000">3km</button>
+                        <button onclick="setRadius(5000)" class="btn-radius" data-val="5000">5km</button>
+                    </div>
+                    <button onclick="clearRadius()" class="btn-danger-ghost">Hapus Radius Aktif</button>
+                </div>
 
-    <!-- RADIUS -->
-    <div class="radius-group">
-      <div class="filter-label"><i class="fas fa-circle-notch"></i> Radius Layanan</div>
-      <div class="radius-btns">
-        <button class="btn-radius" onclick="setRadius(500)">500m</button>
-        <button class="btn-radius" onclick="setRadius(1000)">1 km</button>
-        <button class="btn-radius" onclick="setRadius(3000)">3 km</button>
-        <button class="btn-radius" onclick="setRadius(5000)">5 km</button>
-      </div>
-      <button class="btn-radius-clear" onclick="clearRadius()"><i class="fas fa-times"></i> Hapus Radius</button>
-      <div class="radius-hint"><i class="fas fa-info-circle"></i> Klik marker sekolah → pilih tampilkan radius, atau klik langsung di peta setelah memilih jarak.</div>
-    </div>
+                <!-- Legenda -->
+                <div class="sidebar-section">
+                    <div class="section-label">
+                        <i data-lucide="list" style="width:14px;height:14px;"></i> Legenda Jenjang
+                    </div>
+                    <div class="legend-grid">
+                        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b;"></div>SD</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:#10b981;"></div>SMP</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:#3b82f6;"></div>SMA</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:#a855f7;"></div>SMK</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:#f43f5e;"></div>SLB</div>
+                    </div>
+                </div>
 
-    <!-- LEGENDA -->
-    <div class="legenda-group">
-      <div class="filter-label"><i class="fas fa-map-pin"></i> Legenda Jenjang</div>
-      <div class="legenda-item"><div class="legenda-dot" style="background:#f59e0b"></div><span>SD (Sekolah Dasar)</span></div>
-      <div class="legenda-item"><div class="legenda-dot" style="background:#10b981"></div><span>SMP</span></div>
-      <div class="legenda-item"><div class="legenda-dot" style="background:#3b82f6"></div><span>SMA</span></div>
-      <div class="legenda-item"><div class="legenda-dot" style="background:#8b5cf6"></div><span>SMK</span></div>
-      <div class="legenda-item"><div class="legenda-dot" style="background:#ef4444"></div><span>SLB</span></div>
-    </div>
+                <!-- Statistik -->
+                <div class="sidebar-section">
+                    <div class="section-label">
+                        <i data-lucide="bar-chart-2" style="width:14px;height:14px;"></i> Statistik
+                    </div>
+                    <div id="stat-jenjang"><!-- Filled via JS --></div>
+                </div>
+            </div>
 
-    <!-- STATISTIK -->
-    <div class="stat-group">
-      <div class="filter-label"><i class="fas fa-chart-bar"></i> Statistik</div>
-      <div id="stat-jenjang"></div>
-      <div style="margin-top:12px" class="filter-label"><i class="fas fa-building"></i> Per Kota/Kabupaten (Top 5)</div>
-      <div id="stat-kota"></div>
-    </div>
+            <!-- TAB: BANTUAN -->
+            <div id="tab-bantuan" style="display:none;">
+                <div class="sidebar-section">
+                    <div class="info-box">
+                        Warna marker mengikuti status bantuan:<br>
+                        <span style="color:#ef4444;font-weight:600;">• Merah:</span> Dibutuhkan<br>
+                        <span style="color:#f59e0b;font-weight:600;">• Kuning:</span> Proses<br>
+                        <span style="color:#22c55e;font-weight:600;">• Hijau:</span> Tersalurkan
+                    </div>
+                </div>
 
-    <div class="result-count" id="result-count"><i class="fas fa-map-marker-alt"></i> Memuat data...</div>
-  </aside>
+                <!-- Filter Bantuan -->
+                <div class="sidebar-section">
+                    <div class="section-label">
+                        <i data-lucide="filter" style="width:14px;height:14px;"></i> Filter Bantuan
+                    </div>
+                    <select id="filter-jenis-bantuan" class="form-select">
+                        <option value="all">Semua Jenis Bantuan</option>
+                        <option value="Buku Pelajaran">Buku Pelajaran</option>
+                        <option value="Buku Perpustakaan">Buku Perpustakaan</option>
+                        <option value="Komputer">Komputer</option>
+                        <option value="Internet">Internet</option>
+                        <option value="Meja Kursi">Meja Kursi</option>
+                        <option value="Renovasi Ruang Kelas">Renovasi Ruang Kelas</option>
+                        <option value="Peralatan Laboratorium">Peralatan Laboratorium</option>
+                        <option value="Peralatan Praktik">Peralatan Praktik</option>
+                    </select>
+                    <select id="filter-status-bantuan" class="form-select">
+                        <option value="all">Semua Status</option>
+                        <option value="Dibutuhkan">Dibutuhkan</option>
+                        <option value="Proses">Proses</option>
+                        <option value="Tersalurkan">Tersalurkan</option>
+                    </select>
+                    <select id="filter-prioritas-bantuan" class="form-select">
+                        <option value="all">Semua Prioritas</option>
+                        <option value="Tinggi">Tinggi</option>
+                        <option value="Sedang">Sedang</option>
+                        <option value="Rendah">Rendah</option>
+                    </select>
+                    <button onclick="applyFilterBantuan()" class="btn-primary">Terapkan Filter</button>
+                </div>
 
-  <!-- MAP -->
-  <div id="map"></div>
+                <!-- Jalur Distribusi -->
+                <div class="sidebar-section">
+                    <div class="section-label">
+                        <i data-lucide="route" style="width:14px;height:14px;"></i> Jalur Distribusi
+                    </div>
+                    <button onclick="toggleJalurBantuan()" id="btn-jalur" class="btn-outline">
+                        <i data-lucide="git-merge" style="width:16px;height:16px;"></i> Tampilkan Jalur Estimasi
+                    </button>
+                </div>
+
+                <!-- Rekomendasi Prioritas -->
+                <div class="sidebar-section" style="border-bottom:none;">
+                    <div class="section-label">
+                        <i data-lucide="star" style="width:14px;height:14px;"></i> Rekomendasi Prioritas Tinggi
+                    </div>
+                    <div id="list-prioritas">
+                        <div style="font-size:12px;color:#94a3b8;text-align:center;padding:16px 0;">Memuat rekomendasi...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAP AREA -->
+    <main style="flex:1;position:relative;background:#e7e5e4;">
+        <div id="map" style="width:100%;height:100%;"></div>
+
+        <!-- Status Overlay -->
+        <div id="map-status" class="map-status">
+            <span style="position:relative;display:flex;width:10px;height:10px;">
+                <span style="position:absolute;display:inline-flex;width:100%;height:100%;border-radius:50%;background:#5eead4;opacity:0.75;animation:ping 1s cubic-bezier(0,0,0.2,1) infinite;"></span>
+                <span style="position:relative;display:inline-flex;width:10px;height:10px;border-radius:50%;background:#0d9488;"></span>
+            </span>
+            <span id="status-text">Memuat peta...</span>
+        </div>
+
+        <!-- Radius Info Overlay -->
+        <div id="radius-info" class="radius-info-panel" style="display:none;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+                <div class="ri-title"><i data-lucide="crosshair" style="width:16px;height:16px;color:#94a3b8;"></i> Hasil Radius</div>
+                <button onclick="clearRadius()" style="background:none;border:none;cursor:pointer;color:#94a3b8;display:flex;align-items:center;" title="Tutup">
+                    <i data-lucide="x" style="width:16px;height:16px;"></i>
+                </button>
+            </div>
+            <div class="ri-count" id="ri-count">0</div>
+            <div class="ri-desc">sekolah dalam radius <span id="ri-dist" style="color:#334155;font-weight:600;"></span>.</div>
+            <div class="ri-divider"></div>
+            <div class="ri-list-label">Daftar Sekolah</div>
+            <div id="ri-list" style="max-height:160px;overflow-y:auto;">
+                <!-- List -->
+            </div>
+        </div>
+    </main>
 </div>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
+<style>
+@keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+</style>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ===== WARNA MARKER =====
-const stageColors = {
-  'SD':  {color:'#f59e0b',icon:'🏫'},
-  'SMP': {color:'#10b981',icon:'🏫'},
-  'SMA': {color:'#3b82f6',icon:'🏫'},
-  'SMK': {color:'#8b5cf6',icon:'🎓'},
-  'SLB': {color:'#ef4444',icon:'♿'},
-};
+    lucide.createIcons();
 
-function getColor(stage){ return (stageColors[stage]||{color:'#94a3b8'}).color; }
+    // Configuration
+    const stageColors = {
+        'SD': '#f59e0b',
+        'SMP': '#10b981',
+        'SMA': '#3b82f6',
+        'SMK': '#a855f7',
+        'SLB': '#f43f5e'
+    };
+    
+    const statusBantuanColors = {
+        'Dibutuhkan': '#ef4444',
+        'Proses': '#eab308',
+        'Tersalurkan': '#22c55e'
+    };
 
-function createMarkerIcon(stage, isHighlight=false) {
-  const c = getColor(stage);
-  const s = isHighlight ? 14 : 10;
-  return L.divIcon({
-    className:'',
-    html:`<div style="
-      width:${s}px;height:${s}px;border-radius:50%;
-      background:${c};border:2px solid rgba(255,255,255,0.8);
-      box-shadow:0 2px 6px rgba(0,0,0,0.4);
-      ${isHighlight?'transform:scale(1.4);':''}
-    "></div>`,
-    iconSize:[s,s],iconAnchor:[s/2,s/2],popupAnchor:[0,-s/2]
-  });
-}
+    let currentTab = 'sekolah';
+    let map;
+    let markerLayer = L.layerGroup();
+    let jalurLayer = L.layerGroup();
+    let radiusCircle = null;
+    let selectedRadius = null;
+    let isJalurVisible = false;
 
-// ===== INISIALISASI PETA =====
-const map = L.map('map',{
-  center:[-5.4,105.25],
-  zoom:8,
-  zoomControl:true
-});
+    // Initialize Map
+    function initMap() {
+        map = L.map('map', {
+            center: [-5.1, 105.1],
+            zoom: 8,
+            zoomControl: false
+        });
+        
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-  attribution:'© OpenStreetMap contributors',
-  maxZoom:19
-}).addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
 
-// ===== STATE =====
-let allMarkers = [];
-let markerLayer = L.layerGroup().addTo(map);
-let radiusCircle = null;
-let radiusMarker = null;
-let selectedRadius = null;
-let radiusClickMode = false;
-let totalAll = 0;
+        markerLayer.addTo(map);
+        jalurLayer.addTo(map);
+        
+        loadStatistik();
+        loadSekolah();
+        loadPrioritasBantuan();
+    }
 
-// ===== LOAD DATA =====
-async function loadData(params={}) {
-  try {
-    const url = new URL('/api/sekolah/geojson', window.location.origin);
-    Object.entries(params).forEach(([k,v])=>{ if(v&&v!=='all') url.searchParams.set(k,v); });
+    function setStatus(msg, isError = false) {
+        const el = document.getElementById('map-status');
+        const text = document.getElementById('status-text');
+        text.textContent = msg;
+        text.className = isError ? 'text-rose-500' : 'text-slate-700';
+        
+        const dot = el.querySelector('.bg-blue-500');
+        if(dot) dot.className = `relative inline-flex rounded-full h-2.5 w-2.5 ${isError ? 'bg-rose-500' : 'bg-blue-500'}`;
+        
+        setTimeout(() => { if(text.textContent === msg) el.style.opacity = '0'; }, 3000);
+        el.style.opacity = '1';
+    }
 
-    const res = await fetch(url);
-    const data = await res.json();
+    // Tabs
+    function switchTab(tab) {
+        currentTab = tab;
+        document.getElementById('tab-sekolah').style.display = tab === 'sekolah' ? 'block' : 'none';
+        document.getElementById('tab-bantuan').style.display = tab === 'bantuan' ? 'block' : 'none';
+        
+        document.getElementById('tab-btn-sekolah').className = 'tab-btn' + (tab === 'sekolah' ? ' active' : '');
+        document.getElementById('tab-btn-bantuan').className = 'tab-btn' + (tab === 'bantuan' ? ' active' : '');
 
-    renderMarkers(data.features);
-    document.getElementById('stat-tampil').textContent = data.total.toLocaleString();
-    document.getElementById('result-count').innerHTML =
-      `<i class="fas fa-map-marker-alt"></i> Menampilkan <strong>${data.total.toLocaleString()}</strong> sekolah`;
-  } catch(e) {
-    showToast('Gagal memuat data sekolah. Pastikan database terhubung.', 'error');
-  }
-}
+        if(tab === 'sekolah') applyFilterSekolah();
+        else applyFilterBantuan();
+        
+        clearRadius();
+    }
 
-function renderMarkers(features) {
-  markerLayer.clearLayers();
-  allMarkers = [];
+    // Load Data
+    async function loadSekolah() {
+        setStatus('Memuat data sekolah...');
+        const stage = document.getElementById('filter-stage').value;
+        const status = document.getElementById('filter-status').value;
+        const search = document.getElementById('filter-search').value.trim();
+        
+        let url = new URL('/api/sekolah', window.location.origin);
+        if(stage !== 'all') url.searchParams.append('stage', stage);
+        if(status !== 'all') url.searchParams.append('status', status);
+        if(search) url.searchParams.append('search', search);
 
-  features.forEach(f => {
-    const p = f.properties;
-    const [lng,lat] = f.geometry.coordinates;
-    const marker = L.marker([lat,lng], { icon: createMarkerIcon(p.stage) });
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            renderSekolahMarkers(data.features);
+            document.getElementById('header-tampil').textContent = data.total.toLocaleString();
+            setStatus('Selesai memuat data.');
+        } catch(e) {
+            setStatus('Gagal memuat data!', true);
+        }
+    }
 
-    marker.bindPopup(buildPopup(p), {maxWidth:260});
-    marker.on('click', function(){ map.setView([lat,lng],14); });
-    markerLayer.addLayer(marker);
-    allMarkers.push({marker, props:p});
-  });
-}
+    async function loadBantuan() {
+        setStatus('Memuat data bantuan...');
+        const jenis = document.getElementById('filter-jenis-bantuan').value;
+        const status = document.getElementById('filter-status-bantuan').value;
+        const prioritas = document.getElementById('filter-prioritas-bantuan').value;
+        
+        let url = new URL('/api/bantuan', window.location.origin);
+        if(jenis !== 'all') url.searchParams.append('jenis_bantuan', jenis);
+        if(status !== 'all') url.searchParams.append('status_bantuan', status);
+        if(prioritas !== 'all') url.searchParams.append('tingkat_prioritas', prioritas);
 
-function buildPopup(p) {
-  const c = getColor(p.stage);
-  return `<div class="popup-card">
-    <span class="popup-badge" style="background:${c}22;color:${c};border:1px solid ${c}55">${p.stage}</span>
-    <div class="popup-name">${p.name}</div>
-    <div class="popup-info"><i class="fas fa-tag"></i>${p.status||'-'}</div>
-    <div class="popup-info"><i class="fas fa-map-marker-alt"></i>${p.district||'-'}</div>
-    <div class="popup-info"><i class="fas fa-city"></i>${p.city||'-'}</div>
-    <div class="popup-info"><i class="fas fa-location-arrow"></i>${p.lat?.toFixed(5)}, ${p.lng?.toFixed(5)}</div>
-    <div class="popup-actions">
-      <button class="popup-btn popup-btn-radius" onclick="showRadiusFromPopup(${p.lat},${p.lng})">
-        <i class="fas fa-circle-notch"></i> Radius
-      </button>
-      <button class="popup-btn popup-btn-close" onclick="map.closePopup()">Tutup</button>
-    </div>
-  </div>`;
-}
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            renderBantuanMarkers(data.features);
+            document.getElementById('header-tampil').textContent = data.features.length.toLocaleString();
+            setStatus('Selesai memuat data bantuan.');
+        } catch(e) {
+            setStatus('Gagal memuat data bantuan!', true);
+        }
+    }
 
-// ===== FILTER =====
-function applyFilter() {
-  const stage = document.getElementById('filter-stage').value;
-  const status = document.getElementById('filter-status').value;
-  const search = document.getElementById('input-search').value.trim();
-  loadData({stage,status,search});
-}
+    // Render Markers
+    function renderSekolahMarkers(features) {
+        markerLayer.clearLayers();
+        features.forEach(f => {
+            const p = f.properties;
+            const latlng = [f.geometry.coordinates[1], f.geometry.coordinates[0]];
+            const color = stageColors[p.stage] || '#a1a1aa';
+            
+            const icon = L.divIcon({
+                className: '',
+                html: `<div class="w-3.5 h-3.5 rounded-full border-2 border-white shadow-[0_2px_8px_rgba(0,0,0,0.35)]" style="background:${color}"></div>`,
+                iconSize: [14, 14], iconAnchor: [7, 7]
+            });
 
-function resetFilter() {
-  document.getElementById('filter-stage').value = 'all';
-  document.getElementById('filter-status').value = 'all';
-  document.getElementById('input-search').value = '';
-  loadData();
-}
+            const marker = L.marker(latlng, { icon }).addTo(markerLayer);
+            marker.bindPopup(`
+                <div style="min-width:180px;">
+                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;">
+                        <div style="font-weight:700;font-size:13px;color:#1c1917;line-height:1.3;">${p.name}</div>
+                        <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:#f5f5f4;border:1px solid #e7e5e4;color:#57534e;white-space:nowrap;">${p.stage}</span>
+                    </div>
+                    <div style="font-size:12px;color:#78716c;margin-bottom:3px;display:flex;align-items:center;gap:5px;"><i data-lucide="tag" style="width:12px;height:12px;"></i> ${p.status}</div>
+                    <div style="font-size:12px;color:#78716c;margin-bottom:10px;display:flex;align-items:center;gap:5px;"><i data-lucide="map-pin" style="width:12px;height:12px;"></i> ${p.district}, ${p.city}</div>
+                    <div style="border-top:1px solid #f5f5f4;padding-top:10px;">
+                        <button onclick="drawRadius(${latlng[0]}, ${latlng[1]}, '${p.name}')" style="width:100%;background:#f0fdfa;border:1px solid #99f6e4;color:#0d9488;padding:7px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-family:inherit;transition:background 0.2s;">
+                            <i data-lucide="target" style="width:14px;height:14px;"></i> Analisis Radius
+                        </button>
+                    </div>
+                </div>
+            `);
+            marker.on('popupopen', () => lucide.createIcons());
+        });
+    }
 
-// Enter key search
-document.getElementById('input-search').addEventListener('keydown', e => {
-  if (e.key === 'Enter') applyFilter();
-});
+    function renderBantuanMarkers(features) {
+        markerLayer.clearLayers();
+        features.forEach(f => {
+            const p = f.properties;
+            const latlng = [f.geometry.coordinates[1], f.geometry.coordinates[0]];
+            const color = statusBantuanColors[p.status_bantuan] || '#a1a1aa';
+            
+            const isHighPriority = p.tingkat_prioritas === 'Tinggi' && p.status_bantuan === 'Dibutuhkan';
+            const pulseClass = isHighPriority ? 'marker-pulse' : '';
+            
+            const icon = L.divIcon({
+                className: '',
+                html: `<div class="relative w-4 h-4 rounded-full border-2 border-zinc-950 shadow-[0_0_10px_rgba(0,0,0,0.8)] ${pulseClass}" style="background:${color}"></div>`,
+                iconSize: [16, 16], iconAnchor: [8, 8]
+            });
 
-// ===== RADIUS =====
-function setRadius(r) {
-  selectedRadius = r;
-  document.querySelectorAll('.btn-radius').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
-  showToast(`Mode radius ${r>=1000?r/1000+' km':r+' m'} aktif. Klik marker sekolah untuk tampilkan radius.`);
-}
+            const marker = L.marker(latlng, { icon }).addTo(markerLayer);
+            marker.bindPopup(`
+                <div style="min-width:200px;">
+                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;">
+                        <div style="font-weight:700;font-size:13px;color:#0d9488;line-height:1.3;">${p.school_name}</div>
+                        <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:#f5f5f4;border:1px solid #e7e5e4;color:#57534e;white-space:nowrap;">${p.stage}</span>
+                    </div>
+                    <div style="background:#fafaf9;border:1px solid #e7e5e4;border-radius:8px;padding:8px 10px;font-size:12px;margin-top:6px;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="color:#a8a29e;">Bantuan:</span> <span style="font-weight:500;color:#1c1917;">${p.jenis_bantuan}</span></div>
+                        <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="color:#a8a29e;">Jumlah:</span> <span style="font-weight:500;color:#1c1917;">${p.jumlah}</span></div>
+                        <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="color:#a8a29e;">Status:</span> <span style="font-weight:600;" style="color:${color}">${p.status_bantuan}</span></div>
+                        <div style="display:flex;justify-content:space-between;"><span style="color:#a8a29e;">Prioritas:</span> <span style="font-weight:500;color:${p.tingkat_prioritas === 'Tinggi' ? '#dc2626' : '#1c1917'};">${p.tingkat_prioritas}</span></div>
+                    </div>
+                    <p style="font-size:10px;color:#a8a29e;font-style:italic;margin-top:6px;">${p.keterangan || '-'}</p>
+                </div>
+            `);
+        });
+    }
 
-function showRadiusFromPopup(lat, lng) {
-  if (!selectedRadius) {
-    showToast('Pilih radius terlebih dahulu di panel kiri!');
-    return;
-  }
-  map.closePopup();
-  drawRadius(lat, lng, selectedRadius);
-}
+    // Radius Features
+    function setRadius(r) {
+        selectedRadius = r;
+        document.querySelectorAll('.btn-radius').forEach(b => {
+            if(parseInt(b.dataset.val) === r) {
+                b.classList.add('active');
+            } else {
+                b.classList.remove('active');
+            }
+        });
+        setStatus(`Mode Radius ${r}m aktif. Pilih sekolah di peta.`);
+    }
 
-function drawRadius(lat, lng, r) {
-  clearRadius();
-  radiusCircle = L.circle([lat, lng], {
-    radius: r,
-    color: '#06b6d4',
-    fillColor: '#06b6d4',
-    fillOpacity: 0.1,
-    weight: 2,
-    dashArray: '6,4'
-  }).addTo(map);
+    function clearRadius() {
+        if(radiusCircle) map.removeLayer(radiusCircle);
+        radiusCircle = null;
+        document.getElementById('radius-info').style.display = 'none';
+        selectedRadius = null;
+        document.querySelectorAll('.btn-radius').forEach(b => b.classList.remove('active'));
+    }
 
-  map.fitBounds(radiusCircle.getBounds());
-  fetchRadiusData(lat, lng, r);
-}
+    async function drawRadius(lat, lng, schoolName) {
+        if(!selectedRadius) {
+            alert('Pilih jarak radius terlebih dahulu di panel kiri.');
+            return;
+        }
+        
+        map.closePopup();
+        if(radiusCircle) map.removeLayer(radiusCircle);
+        
+        radiusCircle = L.circle([lat, lng], {
+            radius: selectedRadius,
+            color: '#0d9488',
+            fillColor: '#0d9488',
+            fillOpacity: 0.12,
+            weight: 2,
+            dashArray: '6,6'
+        }).addTo(map);
+        
+        map.flyToBounds(radiusCircle.getBounds(), { padding: [50, 50], duration: 1 });
+        
+        setStatus('Menghitung radius...');
+        
+        try {
+            const res = await fetch(`/api/sekolah/radius?lat=${lat}&lng=${lng}&radius=${selectedRadius}`);
+            const data = await res.json();
+            
+            document.getElementById('ri-count').textContent = data.count;
+            document.getElementById('ri-dist').textContent = selectedRadius >= 1000 ? (selectedRadius/1000)+'km' : selectedRadius+'m';
+            
+            const listHtml = data.sekolah.map(s => `
+                <div style="background:#fafaf9;padding:10px;border-radius:8px;border:1px solid #e7e5e4;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                    <div>
+                        <div style="font-weight:500;color:#1c1917;font-size:12px;">${s.school_name}</div>
+                        <div style="font-size:10px;color:#78716c;">${s.stage} • ${s.district_name}</div>
+                    </div>
+                    <div style="color:#0d9488;font-weight:700;font-size:12px;">${Math.round(s.jarak_meter)}m</div>
+                </div>
+            `).join('');
+            
+            document.getElementById('ri-list').innerHTML = listHtml || '<div style="color:#a8a29e;font-style:italic;padding:8px 0;">Tidak ada sekolah lain dalam radius ini.</div>';
+            document.getElementById('radius-info').style.display = 'block';
+            setStatus('Selesai menghitung radius.');
+        } catch(e) {
+            setStatus('Gagal mengambil data radius.', true);
+        }
+    }
 
-async function fetchRadiusData(lat, lng, r) {
-  try {
-    const res = await fetch(`/api/sekolah/radius?lat=${lat}&lng=${lng}&radius=${r}`);
-    const data = await res.json();
-    document.getElementById('radius-stat').style.display = 'block';
-    document.getElementById('stat-radius').textContent = data.count;
-    showToast(`${data.count} sekolah dalam radius ${r>=1000?r/1000+' km':r+' m'}`);
-  } catch(e) {}
-}
+    // Bantuan Prioritas & Jalur
+    async function loadPrioritasBantuan() {
+        try {
+            const res = await fetch('/api/prioritas-bantuan');
+            const data = await res.json();
+            
+            if(data.length === 0) {
+                document.getElementById('list-prioritas').innerHTML = '<div style="font-size:12px;color:#a8a29e;text-align:center;padding:16px;border:1px dashed #d6d3d1;border-radius:10px;">Tidak ada data prioritas saat ini.</div>';
+                return;
+            }
+            
+            const html = data.map(p => `
+                <div onclick="focusToMarker(${p.lat}, ${p.long})" style="background:#fff;border:1px solid #e7e5e4;border-radius:10px;padding:12px 14px;cursor:pointer;transition:all 0.2s;margin-bottom:8px;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+                        <div style="font-weight:600;font-size:13px;color:#1c1917;">${p.school_name}</div>
+                        <span style="font-size:9px;background:#fef2f2;color:#dc2626;padding:2px 7px;border-radius:4px;border:1px solid #fecaca;text-transform:uppercase;font-weight:600;">Prioritas</span>
+                    </div>
+                    <div style="font-size:10px;color:#78716c;display:flex;align-items:center;gap:4px;margin-bottom:8px;"><i data-lucide="map-pin" style="width:12px;height:12px;"></i> ${p.district_name}, ${p.city_name}</div>
+                    <div style="background:#fafaf9;border-radius:8px;padding:6px 10px;font-size:12px;color:#57534e;border:1px solid #f5f5f4;">
+                        <span style="color:#a8a29e;">Butuh:</span> ${p.jumlah} ${p.jenis_bantuan}
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('list-prioritas').innerHTML = html;
+            lucide.createIcons();
+        } catch(e) {
+            document.getElementById('list-prioritas').innerHTML = '<div style="font-size:12px;color:#dc2626;">Gagal memuat prioritas.</div>';
+        }
+    }
 
-function clearRadius() {
-  if (radiusCircle) { map.removeLayer(radiusCircle); radiusCircle = null; }
-  document.getElementById('radius-stat').style.display = 'none';
-  document.querySelectorAll('.btn-radius').forEach(b => b.classList.remove('active'));
-  selectedRadius = null;
-}
+    function focusToMarker(lat, lng) {
+        map.flyTo([lat, lng], 15, { duration: 1.5 });
+    }
 
-// ===== STATISTIK =====
-async function loadStatistik() {
-  try {
-    const res = await fetch('/api/sekolah/statistik');
-    const data = await res.json();
-    totalAll = data.total;
-    document.getElementById('stat-total').textContent = data.total.toLocaleString();
+    async function toggleJalurBantuan() {
+        const btn = document.getElementById('btn-jalur');
+        
+        if(isJalurVisible) {
+            jalurLayer.clearLayers();
+            isJalurVisible = false;
+            btn.innerHTML = '<i data-lucide="git-merge" style="width:16px;height:16px;"></i> Tampilkan Jalur Estimasi';
+            btn.className = 'btn-outline';
+            lucide.createIcons();
+            return;
+        }
 
-    // Per jenjang
-    const colors = {SD:'#f59e0b',SMP:'#10b981',SMA:'#3b82f6',SMK:'#8b5cf6',SLB:'#ef4444'};
-    const jenjangHtml = Object.entries(data.per_jenjang).map(([j,n]) => `
-      <div class="stat-item">
-        <span style="color:${colors[j]||'#94a3b8'};font-weight:600">${j}</span>
-        <span style="font-weight:700">${n.toLocaleString()}</span>
-      </div>
-      <div class="stat-bar"><div class="stat-bar-fill" style="width:${(n/data.total*100).toFixed(1)}%;background:${colors[j]||'#94a3b8'}"></div></div>
-    `).join('');
-    document.getElementById('stat-jenjang').innerHTML = jenjangHtml;
+        setStatus('Memuat jalur distribusi...');
+        try {
+            const res = await fetch('/api/jalur-bantuan');
+            const data = await res.json();
+            
+            jalurLayer.clearLayers();
+            
+            data.forEach(item => {
+                if(!item.geojson_jalur) return;
+                
+                const geojson = JSON.parse(item.geojson_jalur);
+                L.geoJSON(geojson, {
+                    style: {
+                        color: '#0d9488',
+                        weight: 3,
+                        opacity: 0.7,
+                        dashArray: '10, 10',
+                        className: 'animate-dash'
+                    }
+                }).bindPopup(`
+                    <div style="font-size:13px;">
+                        <div style="font-weight:700;color:#0d9488;margin-bottom:6px;">Jalur Distribusi Bantuan</div>
+                        <div style="font-size:12px;color:#78716c;margin-bottom:3px;">Dari: <span style="color:#1c1917;font-weight:500;">${item.nama_pos}</span></div>
+                        <div style="font-size:12px;color:#78716c;margin-bottom:8px;">Ke: <span style="color:#1c1917;font-weight:500;">${item.school_name}</span></div>
+                        <div style="font-size:10px;background:#fafaf9;padding:6px 8px;border-radius:6px;border:1px solid #e7e5e4;color:#57534e;">${item.jenis_bantuan}</div>
+                    </div>
+                `).addTo(jalurLayer);
+            });
+            
+            isJalurVisible = true;
+            btn.innerHTML = '<i data-lucide="eye-off" style="width:16px;height:16px;"></i> Sembunyikan Jalur';
+            btn.className = 'btn-outline btn-blue';
+            lucide.createIcons();
+            setStatus('Selesai memuat jalur.');
+            
+            if(jalurLayer.getLayers().length > 0) {
+                const group = new L.featureGroup(jalurLayer.getLayers());
+                map.flyToBounds(group.getBounds(), { padding: [50, 50] });
+            }
+            
+        } catch(e) {
+            setStatus('Gagal memuat jalur!', true);
+        }
+    }
 
-    // Per kota top 5
-    const kotaEntries = Object.entries(data.per_kota).slice(0,5);
-    const maxKota = kotaEntries[0]?.[1] || 1;
-    const kotaHtml = kotaEntries.map(([k,n]) => `
-      <div class="stat-item" style="flex-direction:column;align-items:stretch">
-        <div style="display:flex;justify-content:space-between">
-          <span style="font-size:11px">${k}</span>
-          <span style="font-weight:700;color:var(--accent)">${n}</span>
-        </div>
-        <div class="stat-bar" style="margin-top:6px"><div class="stat-bar-fill" style="width:${(n/maxKota*100).toFixed(1)}%;background:var(--accent)"></div></div>
-      </div>
-    `).join('');
-    document.getElementById('stat-kota').innerHTML = kotaHtml;
-  } catch(e) {}
-}
+    // Actions
+    function applyFilterSekolah() { loadSekolah(); }
+    function resetFilterSekolah() {
+        document.getElementById('filter-stage').value = 'all';
+        document.getElementById('filter-status').value = 'all';
+        document.getElementById('filter-search').value = '';
+        loadSekolah();
+    }
+    
+    function applyFilterBantuan() { loadBantuan(); }
 
-// ===== TOAST =====
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 3000);
-}
+    document.getElementById('filter-search').addEventListener('keydown', e => {
+        if(e.key === 'Enter') applyFilterSekolah();
+    });
 
-// ===== INIT =====
-loadData();
-loadStatistik();
+    // Statistik
+    async function loadStatistik() {
+        try {
+            const res = await fetch('/api/sekolah/statistik');
+            const data = await res.json();
+            
+            document.getElementById('header-total').textContent = data.total.toLocaleString();
+            
+            const html = Object.entries(data.per_jenjang).map(([j,n]) => {
+                const pct = ((n/data.total)*100).toFixed(1);
+                const color = stageColors[j] || '#a1a1aa';
+                return `
+                    <div style="margin-bottom:10px;">
+                        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;">
+                            <span style="font-weight:500;color:#44403c;">${j}</span>
+                            <span style="color:#78716c;">${n.toLocaleString()} <span style="font-size:10px;opacity:0.6;">(${pct}%)</span></span>
+                        </div>
+                        <div style="height:6px;width:100%;background:#f5f5f4;border-radius:99px;overflow:hidden;">
+                            <div style="height:100%;border-radius:99px;width:${pct}%;background-color:${color};transition:width 0.8s cubic-bezier(0.4,0,0.2,1);"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('stat-jenjang').innerHTML = html;
+        } catch(e) {
+            console.error(e);
+        }
+    }
+
+    // Custom CSS for dash animation
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .animate-dash { animation: dash 20s linear infinite; }
+        @keyframes dash { to { stroke-dashoffset: -1000; } }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    `;
+    document.head.appendChild(style);
+
+    // Start
+    window.onload = initMap;
 </script>
 </body>
 </html>
