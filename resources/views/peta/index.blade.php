@@ -722,11 +722,34 @@
             return;
         }
 
+        await renderJalur();
+    }
+
+    async function renderJalur() {
+        const btn = document.getElementById('btn-jalur');
         setStatus('Memuat jalur distribusi...');
         try {
             const res = await fetch('/api/jalur-bantuan');
-            const data = await res.json();
-            
+            const allData = await res.json();
+
+            // Filter client-side — hanya terapkan jika kolom ada di data view
+            const jenis = document.getElementById('filter-jenis-bantuan').value;
+            const status = document.getElementById('filter-status-bantuan').value;
+            const prioritas = document.getElementById('filter-prioritas-bantuan').value;
+
+            // Cek kolom apa saja yang tersedia di view (dari baris pertama data)
+            const sample = allData[0] || {};
+            const hasJenis = 'jenis_bantuan' in sample;
+            const hasStatus = 'status_bantuan' in sample;
+            const hasPrioritas = 'tingkat_prioritas' in sample;
+
+            const data = allData.filter(item => {
+                if (jenis !== 'all' && hasJenis && item.jenis_bantuan !== jenis) return false;
+                if (status !== 'all' && hasStatus && item.status_bantuan !== status) return false;
+                if (prioritas !== 'all' && hasPrioritas && item.tingkat_prioritas !== prioritas) return false;
+                return true;
+            });
+
             jalurLayer.clearLayers();
             
             data.forEach(item => {
@@ -735,7 +758,7 @@
                 const geojson = JSON.parse(item.geojson_jalur);
                 L.geoJSON(geojson, {
                     style: {
-                        color: '#0d9488',
+                        color: '#2d6a4f',
                         weight: 3,
                         opacity: 0.7,
                         dashArray: '10, 10',
@@ -743,10 +766,10 @@
                     }
                 }).bindPopup(`
                     <div style="font-size:13px;">
-                        <div style="font-weight:700;color:#0d9488;margin-bottom:6px;">Jalur Distribusi Bantuan</div>
-                        <div style="font-size:12px;color:#78716c;margin-bottom:3px;">Dari: <span style="color:#1c1917;font-weight:500;">${item.nama_pos}</span></div>
-                        <div style="font-size:12px;color:#78716c;margin-bottom:8px;">Ke: <span style="color:#1c1917;font-weight:500;">${item.school_name}</span></div>
-                        <div style="font-size:10px;background:#fafaf9;padding:6px 8px;border-radius:6px;border:1px solid #e7e5e4;color:#57534e;">${item.jenis_bantuan}</div>
+                        <div style="font-weight:700;color:#2d6a4f;margin-bottom:6px;">Jalur Distribusi Bantuan</div>
+                        <div style="font-size:12px;color:#71717a;margin-bottom:3px;">Dari: <span style="color:#18181b;font-weight:500;">${item.nama_pos}</span></div>
+                        <div style="font-size:12px;color:#71717a;margin-bottom:8px;">Ke: <span style="color:#18181b;font-weight:500;">${item.school_name}</span></div>
+                        <div style="font-size:10px;background:#fafafa;padding:6px 8px;border-radius:6px;border:1px solid #e4e4e7;color:#52525b;">${item.jenis_bantuan}</div>
                     </div>
                 `).addTo(jalurLayer);
             });
@@ -755,7 +778,7 @@
             btn.innerHTML = '<i data-lucide="eye-off" style="width:16px;height:16px;"></i> Sembunyikan Jalur';
             btn.className = 'btn-outline btn-blue';
             lucide.createIcons();
-            setStatus('Selesai memuat jalur.');
+            setStatus(`Menampilkan ${data.length} jalur distribusi.`);
             
             if(jalurLayer.getLayers().length > 0) {
                 const group = new L.featureGroup(jalurLayer.getLayers());
@@ -767,6 +790,15 @@
         }
     }
 
+    function applyFilterBantuan() {
+        // Jika jalur sedang ditampilkan, reload jalur sesuai filter baru
+        if (isJalurVisible) {
+            renderJalur();
+        }
+        loadBantuan();
+    }
+            
+
     // Actions
     function applyFilterSekolah() { loadSekolah(); }
     function resetFilterSekolah() {
@@ -777,7 +809,18 @@
         loadSekolah();
     }
     
-    function applyFilterBantuan() { loadBantuan(); }
+    function applyFilterBantuan() {
+        // Sembunyikan jalur distribusi saat filter berubah
+        if (isJalurVisible) {
+            jalurLayer.clearLayers();
+            isJalurVisible = false;
+            const btn = document.getElementById('btn-jalur');
+            btn.innerHTML = '<i data-lucide="git-merge" style="width:16px;height:16px;"></i> Tampilkan Jalur Estimasi';
+            btn.className = 'btn-outline';
+            lucide.createIcons();
+        }
+        loadBantuan();
+    }
 
     document.getElementById('filter-search').addEventListener('keydown', e => {
         if(e.key === 'Enter') applyFilterSekolah();
