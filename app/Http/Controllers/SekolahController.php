@@ -52,12 +52,17 @@ class SekolahController extends Controller
             }
         }
 
+        // Filter kondisi fasilitas
+        if ($request->kondisi && $request->kondisi !== 'all') {
+            $query->where('kondisi_fasilitas', $request->kondisi);
+        }
+
         // Search nama sekolah
         if ($request->search) {
             $query->where('school_name', 'ilike', '%' . $request->search . '%');
         }
 
-        $sekolah = $query->get(['id_sekolah', 'school_name', 'stage', 'status', 'city_name', 'district_name', 'lat', 'long']);
+        $sekolah = $query->get(['id_sekolah', 'school_name', 'stage', 'status', 'city_name', 'district_name', 'lat', 'long', 'kondisi_fasilitas']);
 
         $features = $sekolah->filter(function ($s) {
             $lat = (float)$s->lat;
@@ -83,6 +88,7 @@ class SekolahController extends Controller
                     'district' => $s->district_name,
                     'lat' => (float)$s->lat,
                     'lng' => (float)$s->long,
+                    'kondisi_fasilitas' => $s->kondisi_fasilitas ?? '-',
                 ],
             ];
         });
@@ -170,11 +176,18 @@ class SekolahController extends Controller
             ->pluck('jumlah', 'city_name')
             ->toArray();
 
+        $perKondisi = Sekolah::select('kondisi_fasilitas', DB::raw('count(*) as jumlah'))
+            ->whereNotNull('kondisi_fasilitas')
+            ->groupBy('kondisi_fasilitas')
+            ->pluck('jumlah', 'kondisi_fasilitas')
+            ->toArray();
+
         return [
             'total' => $total,
             'per_jenjang' => $perJenjang,
             'per_status' => $perStatus,
             'per_kota' => $perKota,
+            'per_kondisi' => $perKondisi,
         ];
     }
 

@@ -19,6 +19,7 @@ class Sekolah extends Model
         'status',
         'lat',
         'long',
+        'kondisi_fasilitas',
     ];
 
     protected $casts = [
@@ -55,6 +56,17 @@ class Sekolah extends Model
     {
         if ($keyword) {
             return $query->where('school_name', 'ilike', '%' . $keyword . '%');
+        }
+        return $query;
+    }
+
+    /**
+     * Scope filter by kondisi fasilitas
+     */
+    public function scopeByKondisi($query, $kondisi)
+    {
+        if ($kondisi && $kondisi !== 'all') {
+            return $query->where('kondisi_fasilitas', $kondisi);
         }
         return $query;
     }

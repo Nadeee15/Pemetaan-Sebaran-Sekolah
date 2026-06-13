@@ -7,7 +7,7 @@
     <title>SIG Sekolah Lampung — Pemetaan & Aksesibilitas</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     @vite(['resources/css/app.css'])
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -15,10 +15,10 @@
         *, *::before, *::after { box-sizing: border-box; }
 
         /* SCROLLBAR */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: #fafaf9; }
-        ::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 99px; }
-        ::-webkit-scrollbar-thumb:hover { background: #a8a29e; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 99px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
 
         /* LEAFLET POPUP */
         .leaflet-popup-content-wrapper { background: #ffffff; color: #1c1917; border: 1px solid #e7e5e4; border-radius: 12px; box-shadow: 0 12px 32px rgb(0 0 0 / 0.1); }
@@ -27,68 +27,68 @@
         .leaflet-container a.leaflet-popup-close-button { color: #64748b; padding: 4px; }
 
         /* BODY */
-        body { background: #fafaf9; color: #1c1917; font-family: 'Inter', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; margin: 0; }
+        body { background: #f4f4f5; color: #18181b; font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; margin: 0; }
 
         /* HEADER */
-        .app-header { height: 56px; background: #ffffff; border-bottom: 1px solid #e7e5e4; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 50; flex-shrink: 0; }
-        .header-logo { background: #0d9488; color: #fff; padding: 7px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-        .header-title h1 { font-size: 15px; font-weight: 700; color: #1c1917; margin: 0; letter-spacing: -0.01em; }
-        .header-title p { font-size: 11px; color: #78716c; margin: 0; }
-        .header-stats { display: flex; align-items: center; gap: 20px; font-size: 12px; }
+        .app-header { height: 52px; background: #fff; border-bottom: 1px solid #e4e4e7; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; z-index: 50; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        .header-logo { background: #2d6a4f; color: #fff; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .header-title h1 { font-size: 14px; font-weight: 700; color: #18181b; margin: 0; }
+        .header-title p { font-size: 11px; color: #71717a; margin: 0; font-weight: 400; }
+        .header-stats { display: flex; align-items: center; gap: 16px; }
         .stat-pill { display: flex; flex-direction: column; align-items: flex-end; }
-        .stat-pill span:first-child { color: #78716c; font-size: 11px; }
-        .stat-pill span:last-child { font-family: 'Inter', monospace; font-weight: 700; color: #1c1917; font-size: 16px; }
-        .stat-divider { width: 1px; height: 28px; background: #e7e5e4; }
+        .stat-pill span:first-child { font-size: 10px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
+        .stat-pill span:last-child { font-family: 'DM Mono', monospace; font-weight: 500; color: #18181b; font-size: 15px; line-height: 1.2; }
+        .stat-divider { width: 1px; height: 24px; background: #e4e4e7; }
 
         /* MAIN LAYOUT */
         .app-main { display: flex; flex: 1; overflow: hidden; }
 
         /* SIDEBAR */
-        .app-sidebar { width: 340px; background: #ffffff; border-right: 1px solid #e7e5e4; display: flex; flex-direction: column; flex-shrink: 0; z-index: 40; }
+        .app-sidebar { width: 300px; background: #fff; border-right: 1px solid #e4e4e7; display: flex; flex-direction: column; flex-shrink: 0; z-index: 40; }
 
         /* TABS */
-        .tab-bar { display: flex; padding: 6px; border-bottom: 1px solid #e7e5e4; gap: 4px; background: #fafaf9; }
-        .tab-btn { flex: 1; padding: 7px 0; font-size: 13px; font-weight: 500; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; background: transparent; color: #78716c; font-family: inherit; }
-        .tab-btn:hover { color: #1c1917; background: #f5f5f4; }
-        .tab-btn.active { background: #ffffff; color: #1c1917; border-color: #e7e5e4; box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-weight: 600; }
+        .tab-bar { display: flex; padding: 8px 10px 0; border-bottom: 1px solid #e4e4e7; background: #fff; gap: 2px; }
+        .tab-btn { flex: 1; padding: 7px 0; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; border-bottom: 2px solid transparent; background: transparent; color: #a1a1aa; font-family: inherit; margin-bottom: -1px; }
+        .tab-btn:hover { color: #3f3f46; }
+        .tab-btn.active { color: #2d6a4f; border-bottom-color: #2d6a4f; }
 
         /* SIDEBAR CONTENT */
         .sidebar-scroll { flex: 1; overflow-y: auto; }
-        .sidebar-section { padding: 16px; border-bottom: 1px solid #f5f5f4; }
-        .section-label { font-size: 11px; font-weight: 600; color: #a8a29e; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
+        .sidebar-section { padding: 14px 16px; border-bottom: 1px solid #f4f4f5; }
+        .section-label { font-size: 10px; font-weight: 600; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.07em; display: flex; align-items: center; gap: 5px; margin-bottom: 10px; }
 
         /* INPUTS */
-        .input-search { width: 100%; background: #fafaf9; border: 1px solid #d6d3d1; border-radius: 8px; padding: 9px 10px 9px 34px; font-size: 13px; color: #1c1917; font-family: inherit; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
-        .input-search:focus { border-color: #5eead4; box-shadow: 0 0 0 3px rgba(13,148,136,0.08); }
-        .input-search::placeholder { color: #a8a29e; }
-        .input-wrap { position: relative; margin-bottom: 10px; }
-        .input-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #a8a29e; width: 16px; height: 16px; }
-        select.form-select { width: 100%; background: #fafaf9; border: 1px solid #d6d3d1; border-radius: 8px; padding: 9px 10px; font-size: 13px; color: #1c1917; font-family: inherit; outline: none; transition: border-color 0.2s; cursor: pointer; margin-bottom: 10px; -webkit-appearance: none; }
-        select.form-select:focus { border-color: #5eead4; }
+        .input-search { width: 100%; background: #fafafa; border: 1px solid #e4e4e7; border-radius: 6px; padding: 8px 10px 8px 32px; font-size: 12.5px; color: #18181b; font-family: inherit; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+        .input-search:focus { border-color: #2d6a4f; box-shadow: 0 0 0 3px rgba(45,106,79,0.1); background: #fff; }
+        .input-search::placeholder { color: #a1a1aa; }
+        .input-wrap { position: relative; margin-bottom: 8px; }
+        .input-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: #a1a1aa; width: 15px; height: 15px; }
+        select.form-select { width: 100%; background: #fafafa; border: 1px solid #e4e4e7; border-radius: 6px; padding: 8px 10px; font-size: 12.5px; color: #18181b; font-family: inherit; outline: none; transition: border-color 0.15s; cursor: pointer; margin-bottom: 8px; -webkit-appearance: none; }
+        select.form-select:focus { border-color: #2d6a4f; box-shadow: 0 0 0 3px rgba(45,106,79,0.1); }
 
         /* BUTTONS */
-        .btn-primary { width: 100%; background: #0d9488; color: #fff; border: none; border-radius: 8px; padding: 9px 12px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s ease; }
-        .btn-primary:hover { background: #0f766e; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(13,148,136,0.2); }
-        .btn-icon { padding: 8px; background: #fafaf9; border: 1px solid #d6d3d1; border-radius: 8px; color: #78716c; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
-        .btn-icon:hover { background: #f5f5f4; border-color: #a8a29e; }
-        .btn-row { display: flex; gap: 8px; }
+        .btn-primary { width: 100%; background: #2d6a4f; color: #fff; border: none; border-radius: 6px; padding: 8px 12px; font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.15s; }
+        .btn-primary:hover { background: #1b4332; box-shadow: 0 2px 8px rgba(45,106,79,0.3); }
+        .btn-icon { padding: 7px; background: #fafafa; border: 1px solid #e4e4e7; border-radius: 6px; color: #71717a; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
+        .btn-icon:hover { background: #f0f0f0; }
+        .btn-row { display: flex; gap: 7px; }
 
         /* RADIUS BUTTONS */
-        .radius-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
-        .btn-radius { background: #fafaf9; border: 1px solid #d6d3d1; border-radius: 8px; padding: 8px 4px; font-size: 12px; color: #57534e; font-family: inherit; cursor: pointer; text-align: center; transition: all 0.2s; }
-        .btn-radius:hover { border-color: #99f6e4; color: #0d9488; background: #f0fdfa; }
-        .btn-radius.active { background: #0d9488; border-color: #0d9488; color: #ffffff; font-weight: 600; }
-        .btn-danger-ghost { width: 100%; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #dc2626; font-family: inherit; cursor: pointer; transition: all 0.2s; }
-        .btn-danger-ghost:hover { background: #fee2e2; border-color: #fca5a5; }
-        .btn-outline { width: 100%; background: #fafaf9; border: 1px solid #d6d3d1; border-radius: 8px; padding: 9px 12px; font-size: 13px; color: #57534e; font-family: inherit; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-outline:hover { border-color: #99f6e4; color: #0d9488; }
-        .btn-blue { background: #0d9488; color: #fff; border-color: transparent; }
-        .btn-blue:hover { background: #0f766e; }
+        .radius-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 8px; }
+        .btn-radius { background: #fafafa; border: 1px solid #e4e4e7; border-radius: 6px; padding: 7px 4px; font-size: 11.5px; color: #52525b; font-family: inherit; cursor: pointer; text-align: center; transition: all 0.15s; font-weight: 500; }
+        .btn-radius:hover { border-color: #2d6a4f; color: #2d6a4f; background: #f0fdf4; }
+        .btn-radius.active { background: #2d6a4f; border-color: #2d6a4f; color: #fff; font-weight: 600; }
+        .btn-danger-ghost { width: 100%; background: #fff5f5; border: 1px solid #fecaca; border-radius: 6px; padding: 7px 12px; font-size: 12px; color: #dc2626; font-family: inherit; cursor: pointer; transition: all 0.15s; }
+        .btn-danger-ghost:hover { background: #fee2e2; }
+        .btn-outline { width: 100%; background: #fafafa; border: 1px solid #e4e4e7; border-radius: 6px; padding: 8px 12px; font-size: 12.5px; color: #3f3f46; font-family: inherit; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-outline:hover { border-color: #2d6a4f; color: #2d6a4f; }
+        .btn-blue { background: #2d6a4f; color: #fff; border-color: transparent; }
+        .btn-blue:hover { background: #1b4332; }
 
         /* LEGENDA */
-        .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #57534e; font-weight: 500; }
-        .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(0,0,0,0.06); }
+        .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+        .legend-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #3f3f46; font-weight: 500; }
+        .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 
         /* STATISTIK */
         .stat-bar-item { margin-bottom: 12px; }
@@ -99,32 +99,32 @@
         .stat-bar-fill { height: 100%; border-radius: 99px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
 
         /* INFO BOX */
-        .info-box { background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #115e59; line-height: 1.7; }
+        .info-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 11px 13px; font-size: 12px; color: #166534; line-height: 1.75; }
 
         /* PRIORITY CARDS */
-        .priority-card { background: #fff; border: 1px solid #e7e5e4; border-radius: 10px; padding: 12px 14px; cursor: pointer; transition: all 0.2s ease; margin-bottom: 8px; }
-        .priority-card:hover { border-color: #99f6e4; box-shadow: 0 4px 12px rgba(13,148,136,0.06); transform: translateY(-1px); }
-        .priority-name { font-weight: 600; font-size: 13px; color: #1c1917; transition: color 0.2s; }
-        .priority-card:hover .priority-name { color: #0d9488; }
-        .priority-badge { font-size: 9px; background: #fef2f2; color: #dc2626; padding: 2px 7px; border-radius: 4px; border: 1px solid #fecaca; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
-        .priority-loc { font-size: 11px; color: #78716c; display: flex; align-items: center; gap: 4px; margin: 4px 0 6px; }
-        .priority-detail { background: #fafaf9; border-radius: 8px; padding: 8px 10px; font-size: 12px; color: #57534e; border: 1px solid #f5f5f4; }
+        .priority-card { background: #fff; border: 1px solid #e4e4e7; border-radius: 8px; padding: 11px 13px; cursor: pointer; transition: all 0.15s; margin-bottom: 7px; }
+        .priority-card:hover { border-color: #2d6a4f; box-shadow: 0 2px 8px rgba(45,106,79,0.1); transform: translateY(-1px); }
+        .priority-name { font-weight: 600; font-size: 12.5px; color: #18181b; transition: color 0.15s; }
+        .priority-card:hover .priority-name { color: #2d6a4f; }
+        .priority-badge { font-size: 9px; background: #fef2f2; color: #dc2626; padding: 2px 6px; border-radius: 4px; border: 1px solid #fecaca; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+        .priority-loc { font-size: 11px; color: #71717a; display: flex; align-items: center; gap: 4px; margin: 3px 0 6px; }
+        .priority-detail { background: #fafafa; border-radius: 6px; padding: 7px 10px; font-size: 11.5px; color: #52525b; border: 1px solid #e4e4e7; }
 
         /* MAP STATUS OVERLAY */
-        .map-status { position: absolute; bottom: 24px; left: 24px; background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border: 1px solid #e7e5e4; padding: 10px 16px; border-radius: 12px; font-size: 12px; font-weight: 500; z-index: 1000; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); transition: opacity 0.3s; color: #57534e; }
+        .map-status { position: absolute; bottom: 20px; left: 20px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border: 1px solid #e4e4e7; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; z-index: 1000; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: opacity 0.3s; color: #3f3f46; }
 
         /* RADIUS INFO */
-        .radius-info-panel { position: absolute; top: 24px; right: 24px; background: rgba(255,255,255,0.97); backdrop-filter: blur(12px); border: 1px solid #e7e5e4; padding: 20px; border-radius: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); z-index: 1000; width: 290px; }
-        .ri-title { font-size: 14px; font-weight: 700; color: #1c1917; display: flex; align-items: center; gap: 8px; }
-        .ri-count { font-size: 36px; font-family: 'Inter', sans-serif; font-weight: 800; color: #0d9488; margin: 8px 0 2px; letter-spacing: -0.02em; }
-        .ri-desc { font-size: 12px; color: #78716c; margin-bottom: 14px; }
-        .ri-divider { height: 1px; background: #f5f5f4; margin-bottom: 12px; }
-        .ri-list-label { font-size: 10px; color: #a8a29e; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; margin-bottom: 8px; }
-        .ri-school-item { background: #fafaf9; padding: 10px; border-radius: 8px; border: 1px solid #e7e5e4; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; transition: border-color 0.2s; }
-        .ri-school-item:hover { border-color: #d6d3d1; }
-        .ri-school-name { font-weight: 500; font-size: 12px; color: #1c1917; }
-        .ri-school-sub { font-size: 10px; color: #78716c; }
-        .ri-school-dist { font-size: 12px; font-family: 'Inter', monospace; color: #0d9488; font-weight: 700; }
+        .radius-info-panel { position: absolute; top: 16px; right: 16px; background: #fff; border: 1px solid #e4e4e7; padding: 16px; border-radius: 10px; box-shadow: 0 4px 24px rgba(0,0,0,0.1); z-index: 1000; width: 260px; }
+        .ri-title { font-size: 10px; font-weight: 600; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.07em; display: flex; align-items: center; gap: 7px; }
+        .ri-count { font-size: 36px; font-family: 'DM Mono', monospace; font-weight: 500; color: #2d6a4f; margin: 4px 0 0; }
+        .ri-desc { font-size: 11.5px; color: #71717a; margin-bottom: 12px; }
+        .ri-divider { height: 1px; background: #f4f4f5; margin-bottom: 10px; }
+        .ri-list-label { font-size: 9.5px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin-bottom: 7px; }
+        .ri-school-item { background: #fafafa; padding: 8px 10px; border-radius: 6px; border: 1px solid #f4f4f5; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; transition: border-color 0.15s; }
+        .ri-school-item:hover { border-color: #d4d4d8; }
+        .ri-school-name { font-weight: 500; font-size: 12px; color: #18181b; }
+        .ri-school-sub { font-size: 10px; color: #71717a; }
+        .ri-school-dist { font-size: 11.5px; font-family: 'DM Mono', monospace; color: #2d6a4f; font-weight: 500; }
 
         /* PULSE ANIMATION */
         @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0.5; } 100% { transform: scale(2.4); opacity: 0; } }
@@ -193,7 +193,7 @@
                         <i data-lucide="search" class="input-icon"></i>
                         <input type="text" id="filter-search" placeholder="Cari nama sekolah..." class="input-search">
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px;">
                         <select id="filter-stage" class="form-select" style="margin-bottom:0;">
                             <option value="all">Semua Jenjang</option>
                             <option value="SD">SD</option>
@@ -208,6 +208,12 @@
                             <option value="Swasta">Swasta</option>
                         </select>
                     </div>
+                    <select id="filter-kondisi" class="form-select">
+                        <option value="all">Semua Kondisi Fasilitas</option>
+                        <option value="Baik">🟢 Baik</option>
+                        <option value="Sedang">🟡 Sedang</option>
+                        <option value="Minim">🔴 Minim</option>
+                    </select>
                     <div class="btn-row">
                         <button onclick="applyFilterSekolah()" class="btn-primary" style="flex:1;">Terapkan Filter</button>
                         <button onclick="resetFilterSekolah()" class="btn-icon" title="Reset Filter">
@@ -230,7 +236,7 @@
                     <button onclick="clearRadius()" class="btn-danger-ghost">Hapus Radius Aktif</button>
                 </div>
 
-                <!-- Legenda -->
+                <!-- Legenda Jenjang -->
                 <div class="sidebar-section">
                     <div class="section-label">
                         <i data-lucide="list" style="width:14px;height:14px;"></i> Legenda Jenjang
@@ -244,12 +250,42 @@
                     </div>
                 </div>
 
-                <!-- Statistik -->
+                <!-- Legenda Kondisi Fasilitas -->
                 <div class="sidebar-section">
                     <div class="section-label">
-                        <i data-lucide="bar-chart-2" style="width:14px;height:14px;"></i> Statistik
+                        <i data-lucide="building-2" style="width:14px;height:14px;"></i> Kondisi Fasilitas
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                        <div class="legend-item">
+                            <div style="width:10px;height:10px;border-radius:3px;background:#22c55e;flex-shrink:0;"></div>
+                            <span>Baik</span>
+                        </div>
+                        <div class="legend-item">
+                            <div style="width:10px;height:10px;border-radius:3px;background:#f59e0b;flex-shrink:0;"></div>
+                            <span>Sedang</span>
+                        </div>
+                        <div class="legend-item">
+                            <div style="width:10px;height:10px;border-radius:3px;background:#ef4444;flex-shrink:0;"></div>
+                            <span>Minim</span>
+                        </div>
+                    </div>
+                    <div style="margin-top:8px;font-size:10px;color:#a1a1aa;font-style:italic;">* Saat filter kondisi aktif, warna marker mengikuti kondisi fasilitas</div>
+                </div>
+
+                <!-- Statistik Jenjang -->
+                <div class="sidebar-section">
+                    <div class="section-label">
+                        <i data-lucide="bar-chart-2" style="width:14px;height:14px;"></i> Statistik Jenjang
                     </div>
                     <div id="stat-jenjang"><!-- Filled via JS --></div>
+                </div>
+
+                <!-- Statistik Kondisi Fasilitas -->
+                <div class="sidebar-section" style="border-bottom:none;">
+                    <div class="section-label">
+                        <i data-lucide="activity" style="width:14px;height:14px;"></i> Statistik Kondisi Fasilitas
+                    </div>
+                    <div id="stat-kondisi"><!-- Filled via JS --></div>
                 </div>
             </div>
 
@@ -372,6 +408,12 @@
         'Tersalurkan': '#22c55e'
     };
 
+    const kondisiColors = {
+        'Baik': '#22c55e',
+        'Sedang': '#f59e0b',
+        'Minim': '#ef4444'
+    };
+
     let currentTab = 'sekolah';
     let map;
     let markerLayer = L.layerGroup();
@@ -437,16 +479,18 @@
         const stage = document.getElementById('filter-stage').value;
         const status = document.getElementById('filter-status').value;
         const search = document.getElementById('filter-search').value.trim();
+        const kondisi = document.getElementById('filter-kondisi').value;
         
         let url = new URL('/api/sekolah', window.location.origin);
         if(stage !== 'all') url.searchParams.append('stage', stage);
         if(status !== 'all') url.searchParams.append('status', status);
         if(search) url.searchParams.append('search', search);
+        if(kondisi !== 'all') url.searchParams.append('kondisi', kondisi);
 
         try {
             const res = await fetch(url);
             const data = await res.json();
-            renderSekolahMarkers(data.features);
+            renderSekolahMarkers(data.features, kondisi !== 'all');
             document.getElementById('header-tampil').textContent = data.total.toLocaleString();
             setStatus('Selesai memuat data.');
         } catch(e) {
@@ -477,31 +521,49 @@
     }
 
     // Render Markers
-    function renderSekolahMarkers(features) {
+    // useKondisiColor: true saat filter kondisi aktif
+    function renderSekolahMarkers(features, useKondisiColor = false) {
         markerLayer.clearLayers();
         features.forEach(f => {
             const p = f.properties;
             const latlng = [f.geometry.coordinates[1], f.geometry.coordinates[0]];
-            const color = stageColors[p.stage] || '#a1a1aa';
+
+            // Pilih warna: kondisi (saat filter aktif) atau jenjang (default)
+            let color;
+            if (useKondisiColor) {
+                color = kondisiColors[p.kondisi_fasilitas] || '#a1a1aa';
+            } else {
+                color = stageColors[p.stage] || '#a1a1aa';
+            }
+
+            // Badge kondisi
+            const kondisiLabel = p.kondisi_fasilitas || '-';
+            const kondisiBg = { 'Baik': '#dcfce7', 'Sedang': '#fef9c3', 'Minim': '#fee2e2' }[kondisiLabel] || '#f4f4f5';
+            const kondisiText = { 'Baik': '#166534', 'Sedang': '#713f12', 'Minim': '#991b1b' }[kondisiLabel] || '#52525b';
+            const kondisiBorder = { 'Baik': '#86efac', 'Sedang': '#fde047', 'Minim': '#fca5a5' }[kondisiLabel] || '#e4e4e7';
             
             const icon = L.divIcon({
                 className: '',
-                html: `<div class="w-3.5 h-3.5 rounded-full border-2 border-white shadow-[0_2px_8px_rgba(0,0,0,0.35)]" style="background:${color}"></div>`,
-                iconSize: [14, 14], iconAnchor: [7, 7]
+                html: `<div style="width:13px;height:13px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.3);background:${color}"></div>`,
+                iconSize: [13, 13], iconAnchor: [6, 6]
             });
 
             const marker = L.marker(latlng, { icon }).addTo(markerLayer);
             marker.bindPopup(`
-                <div style="min-width:180px;">
+                <div style="min-width:190px;">
                     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;">
-                        <div style="font-weight:700;font-size:13px;color:#1c1917;line-height:1.3;">${p.name}</div>
-                        <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:#f5f5f4;border:1px solid #e7e5e4;color:#57534e;white-space:nowrap;">${p.stage}</span>
+                        <div style="font-weight:700;font-size:13px;color:#18181b;line-height:1.3;">${p.name}</div>
+                        <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:#f4f4f5;border:1px solid #e4e4e7;color:#52525b;white-space:nowrap;">${p.stage}</span>
                     </div>
-                    <div style="font-size:12px;color:#78716c;margin-bottom:3px;display:flex;align-items:center;gap:5px;"><i data-lucide="tag" style="width:12px;height:12px;"></i> ${p.status}</div>
-                    <div style="font-size:12px;color:#78716c;margin-bottom:10px;display:flex;align-items:center;gap:5px;"><i data-lucide="map-pin" style="width:12px;height:12px;"></i> ${p.district}, ${p.city}</div>
-                    <div style="border-top:1px solid #f5f5f4;padding-top:10px;">
-                        <button onclick="drawRadius(${latlng[0]}, ${latlng[1]}, '${p.name}')" style="width:100%;background:#f0fdfa;border:1px solid #99f6e4;color:#0d9488;padding:7px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-family:inherit;transition:background 0.2s;">
-                            <i data-lucide="target" style="width:14px;height:14px;"></i> Analisis Radius
+                    <div style="font-size:11.5px;color:#71717a;margin-bottom:3px;display:flex;align-items:center;gap:5px;"><i data-lucide="tag" style="width:11px;height:11px;"></i> ${p.status}</div>
+                    <div style="font-size:11.5px;color:#71717a;margin-bottom:8px;display:flex;align-items:center;gap:5px;"><i data-lucide="map-pin" style="width:11px;height:11px;"></i> ${p.district}, ${p.city}</div>
+                    <div style="background:${kondisiBg};border:1px solid ${kondisiBorder};border-radius:6px;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                        <span style="font-size:11px;color:#52525b;">Kondisi Fasilitas</span>
+                        <span style="font-size:11px;font-weight:700;color:${kondisiText};">${kondisiLabel}</span>
+                    </div>
+                    <div style="border-top:1px solid #f4f4f5;padding-top:8px;">
+                        <button onclick="drawRadius(${latlng[0]}, ${latlng[1]}, '${p.name}')" style="width:100%;background:#f0fdf4;border:1px solid #86efac;color:#15803d;padding:7px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-family:inherit;">
+                            <i data-lucide="target" style="width:13px;height:13px;"></i> Analisis Radius
                         </button>
                     </div>
                 </div>
@@ -711,6 +773,7 @@
         document.getElementById('filter-stage').value = 'all';
         document.getElementById('filter-status').value = 'all';
         document.getElementById('filter-search').value = '';
+        document.getElementById('filter-kondisi').value = 'all';
         loadSekolah();
     }
     
@@ -728,23 +791,45 @@
             
             document.getElementById('header-total').textContent = data.total.toLocaleString();
             
-            const html = Object.entries(data.per_jenjang).map(([j,n]) => {
+            // Statistik per jenjang
+            const htmlJenjang = Object.entries(data.per_jenjang).map(([j,n]) => {
                 const pct = ((n/data.total)*100).toFixed(1);
                 const color = stageColors[j] || '#a1a1aa';
                 return `
                     <div style="margin-bottom:10px;">
-                        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;">
-                            <span style="font-weight:500;color:#44403c;">${j}</span>
-                            <span style="color:#78716c;">${n.toLocaleString()} <span style="font-size:10px;opacity:0.6;">(${pct}%)</span></span>
+                        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+                            <span style="font-weight:500;color:#3f3f46;">${j}</span>
+                            <span style="color:#71717a;">${n.toLocaleString()} <span style="font-size:10px;opacity:0.7;">(${pct}%)</span></span>
                         </div>
-                        <div style="height:6px;width:100%;background:#f5f5f4;border-radius:99px;overflow:hidden;">
-                            <div style="height:100%;border-radius:99px;width:${pct}%;background-color:${color};transition:width 0.8s cubic-bezier(0.4,0,0.2,1);"></div>
+                        <div style="height:5px;width:100%;background:#f4f4f5;border-radius:99px;overflow:hidden;">
+                            <div style="height:100%;border-radius:99px;width:${pct}%;background:${color};transition:width 0.8s ease;"></div>
                         </div>
                     </div>
                 `;
             }).join('');
-            
-            document.getElementById('stat-jenjang').innerHTML = html;
+            document.getElementById('stat-jenjang').innerHTML = htmlJenjang;
+
+            // Statistik kondisi fasilitas
+            const kondisiOrder = ['Baik', 'Sedang', 'Minim'];
+            const totalKondisi = Object.values(data.per_kondisi || {}).reduce((a,b) => a+b, 0);
+            const htmlKondisi = kondisiOrder.map(k => {
+                const n = (data.per_kondisi || {})[k] || 0;
+                const pct = totalKondisi > 0 ? ((n/totalKondisi)*100).toFixed(1) : '0.0';
+                const color = kondisiColors[k] || '#a1a1aa';
+                return `
+                    <div style="margin-bottom:10px;">
+                        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+                            <span style="font-weight:500;color:#3f3f46;">${k}</span>
+                            <span style="color:#71717a;">${n.toLocaleString()} <span style="font-size:10px;opacity:0.7;">(${pct}%)</span></span>
+                        </div>
+                        <div style="height:5px;width:100%;background:#f4f4f5;border-radius:99px;overflow:hidden;">
+                            <div style="height:100%;border-radius:99px;width:${pct}%;background:${color};transition:width 0.8s ease;"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('stat-kondisi').innerHTML = htmlKondisi || '<div style="font-size:12px;color:#a1a1aa;">Belum ada data kondisi.</div>';
+
         } catch(e) {
             console.error(e);
         }
